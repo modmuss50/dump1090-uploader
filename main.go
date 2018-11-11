@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"code.cloudfoundry.org/bytefmt"
 	"flag"
 	"fmt"
 	"net"
@@ -15,6 +16,11 @@ var (
 	port     *string
 	dump1090 *string
 	mlat     *bool
+)
+
+var (
+	messageCount        = 0
+	messageSize  uint64 = 0
 )
 
 func main() {
@@ -35,6 +41,8 @@ func main() {
 	}
 
 	go connectRemote()
+
+	go printDebug()
 
 	waitForExit()
 	fmt.Println("Shutting down... have fun :)")
@@ -127,6 +135,9 @@ func writeRemote(message []byte) {
 	_, err := RemoteServer.Write(message)
 	if err != nil {
 		remoteError(err)
+	} else {
+		messageCount++
+		messageSize += uint64(len(message))
 	}
 }
 
@@ -136,6 +147,14 @@ func remoteError(err error) {
 	fmt.Println(err)
 	time.Sleep(10 * time.Second)
 	connectRemote()
+}
+
+func printDebug() {
+	time.Sleep(60 * time.Second)
+	fmt.Printf("%d messages sent in the last 60 seconds (%sB) \n", messageCount, bytefmt.ByteSize(messageSize))
+	messageCount = 0
+	messageSize = 0
+	printDebug()
 }
 
 //Waits for the enter key to be pressed

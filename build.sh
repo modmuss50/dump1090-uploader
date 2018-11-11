@@ -10,6 +10,10 @@ platforms=("windows/amd64" "windows/386" "linux/amd64" "linux/386" "linux/arm" "
 
 version="1.0.0"
 
+if ! [[ -z "${BUILD_NUMBER}" ]]; then
+  version=$version'.'${BUILD_NUMBER}
+fi
+
 for platform in "${platforms[@]}"
 do
     echo 'Building for ' ${platform}
