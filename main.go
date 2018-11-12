@@ -17,6 +17,7 @@ var (
 	dump1090     *string
 	dump1090Port *string
 	mlat         *bool
+	mlatPort     *string
 )
 
 var (
@@ -30,8 +31,9 @@ func main() {
 	port = flag.String("port", "5000", "The remote server port")
 
 	dump1090 = flag.String("dump1090", "localhost", "The dump1090 hostname or ip")
-	dump1090Port = flag.String("dump1090Port", "30005", "The dump1090 none mlat port")
+	dump1090Port = flag.String("dump1090Port", "30005", "The dump1090 raw output port")
 	mlat = flag.Bool("mlat", true, "Enables the reading of mlat data from dump1090")
+	mlatPort = flag.String("mlatPort", "30105", "The dump1090 raw output port for mlat data")
 
 	flag.Parse()
 
@@ -81,7 +83,7 @@ func dump1090Error(err error) {
 
 //Dump1090 uses a different port for mlat aircraft, I am not sure if both 30003 and 30005 are needed
 func connectDump1090mlat() {
-	address := *dump1090 + ":30105"
+	address := *dump1090 + ":" + *mlatPort
 	fmt.Println("Attempting to connect dump1090(mlat) @" + address)
 	conn, err := net.Dial("tcp", address)
 	if err != nil {
