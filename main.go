@@ -12,10 +12,11 @@ import (
 )
 
 var (
-	server   *string
-	port     *string
-	dump1090 *string
-	mlat     *bool
+	server       *string
+	port         *string
+	dump1090     *string
+	dump1090Port *string
+	mlat         *bool
 )
 
 var (
@@ -29,6 +30,7 @@ func main() {
 	port = flag.String("port", "5000", "The remote server port")
 
 	dump1090 = flag.String("dump1090", "localhost", "The dump1090 hostname or ip")
+	dump1090Port = flag.String("dump1090Port", "30005", "The dump1090 none mlat port")
 	mlat = flag.Bool("mlat", true, "Enables the reading of mlat data from dump1090")
 
 	flag.Parse()
@@ -51,7 +53,7 @@ func main() {
 
 //This function connections and maintains the connection to dump1090 and reads the data from it
 func connectDump1090() {
-	address := *dump1090 + ":30005"
+	address := *dump1090 + ":" + *dump1090Port
 	fmt.Println("Attempting to connect dump1090 @" + address)
 	conn, err := net.Dial("tcp", address)
 	if err != nil {
