@@ -51,7 +51,7 @@ func main() {
 
 //This function connections and maintains the connection to dump1090 and reads the data from it
 func connectDump1090() {
-	address := *dump1090 + ":30003"
+	address := *dump1090 + ":30005"
 	fmt.Println("Attempting to connect dump1090 @" + address)
 	conn, err := net.Dial("tcp", address)
 	if err != nil {
@@ -79,7 +79,7 @@ func dump1090Error(err error) {
 
 //Dump1090 uses a different port for mlat aircraft, I am not sure if both 30003 and 30005 are needed
 func connectDump1090mlat() {
-	address := *dump1090 + ":30005"
+	address := *dump1090 + ":30105"
 	fmt.Println("Attempting to connect dump1090(mlat) @" + address)
 	conn, err := net.Dial("tcp", address)
 	if err != nil {
