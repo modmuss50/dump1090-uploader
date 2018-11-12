@@ -29,7 +29,7 @@ func main() {
 	port = flag.String("port", "5000", "The remote server port")
 
 	dump1090 = flag.String("dump1090", "localhost", "The dump1090 hostname or ip")
-	mlat = flag.Bool("malt", true, "Enables the reading of mlat data from dump1090")
+	mlat = flag.Bool("mlat", true, "Enables the reading of mlat data from dump1090")
 
 	flag.Parse()
 
