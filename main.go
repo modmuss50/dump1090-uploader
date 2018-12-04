@@ -62,6 +62,8 @@ func connectDump1090() {
 	conn, err := net.Dial("tcp", address)
 	if err != nil {
 		dump1090Error(err)
+		conn.Close()
+		return
 	}
 	reader := bufio.NewReader(conn)
 	tp := textproto.NewReader(reader)
@@ -72,6 +74,8 @@ func connectDump1090() {
 		message, err := tp.ReadLine()
 		if err != nil {
 			dump1090Error(err)
+			conn.Close()
+			return
 		}
 		writeRemote([]byte(message + "\n")) //30 mins to figure out I needed to add back the new line here :D
 		dump1090Count++
@@ -106,6 +110,8 @@ func connectDump1090mlat() {
 	conn, err := net.Dial("tcp", address)
 	if err != nil {
 		dump1090mlatError(err)
+		conn.Close()
+		return
 	}
 	reader := bufio.NewReader(conn)
 	tp := textproto.NewReader(reader)
@@ -116,6 +122,8 @@ func connectDump1090mlat() {
 		message, err := tp.ReadLine()
 		if err != nil {
 			dump1090mlatError(err)
+			conn.Close()
+			return
 		}
 		writeRemote([]byte(message + "\n")) //30 mins to figure out I needed to add back the new line here :D
 		dump1090mlatCount++
