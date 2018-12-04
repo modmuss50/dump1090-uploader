@@ -111,7 +111,7 @@ func connectDump1090mlat() {
 	tp := textproto.NewReader(reader)
 	defer conn.Close()
 	fmt.Println("Connected to dump1090(mlat) @" + address)
-	dump1090MlatKeepAlive(conn)
+	go dump1090MlatKeepAlive(conn)
 	for {
 		message, err := tp.ReadLine()
 		if err != nil {
