@@ -21,8 +21,10 @@ var (
 )
 
 var (
-	messageCount        = 0
-	messageSize  uint64 = 0
+	messageCount             = 0
+	dump1090Count            = 0
+	dump1090mlatCount        = 0
+	messageSize       uint64 = 0
 )
 
 func main() {
@@ -34,7 +36,6 @@ func main() {
 	dump1090Port = flag.String("dump1090Port", "30005", "The dump1090 raw output port")
 	mlat = flag.Bool("mlat", true, "Enables the reading of mlat data from dump1090")
 	mlatPort = flag.String("mlatPort", "30105", "The dump1090 raw output port for mlat data")
-
 	flag.Parse()
 
 	fmt.Println("Starting dump1090 uploader (ENTER to exit)")
@@ -55,6 +56,7 @@ func main() {
 
 //This function connections and maintains the connection to dump1090 and reads the data from it
 func connectDump1090() {
+	dump1090Count = 0
 	address := *dump1090 + ":" + *dump1090Port
 	fmt.Println("Attempting to connect dump1090 @" + address)
 	conn, err := net.Dial("tcp", address)
@@ -65,12 +67,14 @@ func connectDump1090() {
 	tp := textproto.NewReader(reader)
 	defer conn.Close()
 	fmt.Println("Connected to dump1090 @" + address)
+	go dump1090KeepAlive(conn)
 	for {
 		message, err := tp.ReadLine()
 		if err != nil {
 			dump1090Error(err)
 		}
 		writeRemote([]byte(message + "\n")) //30 mins to figure out I needed to add back the new line here :D
+		dump1090Count++
 	}
 }
 
@@ -81,8 +85,22 @@ func dump1090Error(err error) {
 	connectDump1090()
 }
 
+//If there were 0 messages from dump1090 reconnect as some times the connection can close, its a work around that fixes a bug
+func dump1090KeepAlive(conn net.Conn) {
+	dump1090Count = 0
+	time.Sleep(120 * time.Second)
+	if dump1090Count == 0 {
+		fmt.Println("No messages from dump1090 in the last 60 seconds, reconnecting...")
+		conn.Close()
+		connectDump1090()
+	} else {
+		dump1090KeepAlive(conn)
+	}
+}
+
 //Dump1090 uses a different port for mlat aircraft, I am not sure if both 30003 and 30005 are needed
 func connectDump1090mlat() {
+	dump1090mlatCount = 0
 	address := *dump1090 + ":" + *mlatPort
 	fmt.Println("Attempting to connect dump1090(mlat) @" + address)
 	conn, err := net.Dial("tcp", address)
@@ -93,12 +111,27 @@ func connectDump1090mlat() {
 	tp := textproto.NewReader(reader)
 	defer conn.Close()
 	fmt.Println("Connected to dump1090(mlat) @" + address)
+	dump1090MlatKeepAlive(conn)
 	for {
 		message, err := tp.ReadLine()
 		if err != nil {
 			dump1090mlatError(err)
 		}
 		writeRemote([]byte(message + "\n")) //30 mins to figure out I needed to add back the new line here :D
+		dump1090mlatCount++
+	}
+}
+
+//If there were 0 messages from dump1090(mlat) reconnect as some times the connection can close, its a work around that fixes a bug
+func dump1090MlatKeepAlive(conn net.Conn) {
+	dump1090mlatCount = 0
+	time.Sleep(120 * time.Second)
+	if dump1090mlatCount == 0 {
+		fmt.Println("No messages from dump1090(mlat) in the last 60 seconds, reconnecting...")
+		conn.Close()
+		connectDump1090mlat()
+	} else {
+		dump1090MlatKeepAlive(conn)
 	}
 }
 
